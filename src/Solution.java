@@ -1,96 +1,232 @@
 import edu.salle.url.maze.business.enums.Cell;
 import edu.salle.url.maze.business.enums.Direction;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-public class Solution {
-    private Cell[][] config;
+public class Solution implements Comparable<Solution>{
+    private Cell[][] maze;
+    private List<Direction> path;
+    private int posX;
+    private int posY;
+    private int finalX;
+    private int finalY;
+    private boolean[][] stepped;
+    private boolean finished;
     private int level;
-    private int steps;
-    private LinkedList<Direction> q = new LinkedList<>();
-    private List<Direction> optimalPath;
-    private List<Direction> shortestPath;
+    private int dist;
+    //private LinkedList<Direction> q = new LinkedList<>();
 
-    public Solution(int steps) {
-        this.config = new Cell[25][25];
+    public boolean[][] getStepped() {
+        return stepped;
+    }
+
+    public int getPosX() {
+        return posX;
+    }
+
+    public void setPosX(int posX) {
+        this.posX = posX;
+    }
+
+    public int getPosY() {
+        return posY;
+    }
+
+    public void setPosY(int posY) {
+        this.posY = posY;
+    }
+
+    public int getFinalX() {
+        return finalX;
+    }
+
+    public void setFinalX(int finalX) {
+        this.finalX = finalX;
+    }
+
+    public int getFinalY() {
+        return finalY;
+    }
+
+    public void setFinalY(int finalY) {
+        this.finalY = finalY;
+    }
+
+    public int getDist() {
+        return dist;
+    }
+
+    public void setDist(int dist) {
+        this.dist = dist;
+    }
+
+    public Solution(int finalX, int finalY) {
+        this.maze = new Cell[25][25];
+        this.path = new ArrayList<>();
+        this.posX = 0;
+        this.posY = 0;
+        this.finalX = finalX;
+        this.finalY = finalY;
+        this.stepped = new boolean[25][25];
+        this.finished = false;
         this.level = 1;
-        this.steps = steps;
-        this.optimalPath = new LinkedList<>();
-        this.shortestPath = new LinkedList<>();
+        this.dist = 0;
     }
 
     public Solution(Solution parent) {
-        this.config = new Cell[25][25];
-        for (int i = 0; i < config.length; i++) {
-            System.arraycopy(parent.config[i], 0, this.config[i], 0, config[i].length);
-        }
+        this.maze = parent.maze;
+        this.path = parent.path;
+        this.posX = parent.posX;
+        this.posY = parent.posY;
+        this.finalX = parent.finalX;
+        this.finalY = parent.finalY;
+        this.stepped = parent.stepped;
+        this.finished = parent.finished;
         this.level = parent.level;
-        this.steps = parent.steps;
-        this.optimalPath = new LinkedList<>(parent.optimalPath);
-        this.shortestPath = new LinkedList<>(parent.shortestPath);
+        this.dist = parent.dist;
     }
 
-    public List<Direction> getOptimalPath() {
-        return optimalPath;
+    public int getCost() {
+        return Math.abs(this.finalX - this.posX) + Math.abs(this.finalY - this.posY);
     }
 
-    private void printDirections(List<Direction> shortestPath) {
-        for (Direction dir : shortestPath) {
-            System.out.println(dir);
-        }
-    }
+    public List<Solution> expand(Cell[][] maze, boolean[][] stepped, int row, int col, int dist, boolean finished) {
+        List<Solution> children = new ArrayList<>();
 
-    public LinkedList<Direction> solveMaze(Cell[][] cells, int start_row, int start_col) {
-        boolean[][] stepped = new boolean[config.length][config[0].length];
-        branchAndBound(start_row, start_col, cells, stepped);
-        printDirections(shortestPath);
-        return new LinkedList<>(shortestPath);
-    }
+        this.posX = row;
+        this.posY = col;
 
-    private static int manhattanDist(int M, int N, int X1, int Y1, int X2, int Y2) {
-        return Math.abs(X2 - X1) + Math.abs(Y2 - Y1);
-    }
-
-    private void branchAndBound(int row, int col, Cell[][] cells, boolean[][] stepped) {
-        stepped[row][col] = true;
-
-        int i = row;
-        int j = col;
-
-
-        if (cells[i][j] == Cell.EXIT) {
-            return;
+        if (maze[row][col] == Cell.EXIT) {
+            finished = true;
         }
 
         // UP
-        if (cells[i][j + 1] == Cell.EMPTY && !stepped[i][j + 1]) {
-            q.addLast(Direction.UP);
-            branchAndBound(i, j + 1, cells, stepped);
-            q.removeLast();
+        if (maze[row+1][col] == Cell.EMPTY
+                && !stepped[row+1][col]) {
+            dist++;
+            this.level++;
+            row++;
+            stepped[row][col] = true;
+            path.add(Direction.UP);
+
+            // Create child
+            Solution child = new Solution(this);
+            children.add(child);
+
+            // Backtrack
+            dist--;
+            this.level--;
+            row--;
+            stepped[row][col] = false;
+            path.removeLast();
         }
 
         // DOWN
-        if (cells[i][j - 1] == Cell.EMPTY && !stepped[i][j - 1]) {
-            q.addLast(Direction.DOWN);
-            branchAndBound(i, j - 1, cells, stepped);
-            q.removeLast();
-        }
+        if (maze[row-1][col] == Cell.EMPTY
+                && !stepped[row-1][col]) {
+            dist++;
+            this.level++;
+            row--;
+            stepped[row][col] = true;
+            path.add(Direction.DOWN);
 
-        // LEFT
-        if (cells[i - 1][j] == Cell.EMPTY && !stepped[i - 1][j]) {
-            q.addLast(Direction.LEFT);
-            branchAndBound(i - 1, j, cells, stepped);
-            q.removeLast();
+            // Create child
+            Solution child = new Solution(this);
+            children.add(child);
+
+            // Backtrack
+            dist--;
+            this.level--;
+            row++;
+            stepped[row][col] = false;
+            path.removeLast();
         }
 
         // RIGHT
-        if (cells[i + 1][j] == Cell.EMPTY && !stepped[i + 1][j]) {
-            q.addLast(Direction.RIGHT);
-            branchAndBound(i + 1, j, cells, stepped);
-            q.removeLast();
+        if (maze[row][col+1] == Cell.EMPTY
+                && !stepped[row][col+1]) {
+            dist++;
+            this.level++;
+            col++;
+            stepped[row][col] = true;
+            path.add(Direction.RIGHT);
+
+            // Create child
+            Solution child = new Solution(this);
+            children.add(child);
+
+            // Backtrack
+            dist--;
+            this.level--;
+            col--;
+            stepped[row][col] = false;
+            path.removeLast();
         }
 
-        stepped[row][col] = false;
+        // LEFT
+        if (maze[row][col-1] == Cell.EMPTY
+                && !stepped[row][col-1]) {
+            dist++;
+            this.level++;
+            col--;
+            stepped[row][col] = true;
+            path.add(Direction.LEFT);
+
+            // Create child
+            Solution child = new Solution(this);
+            children.add(child);
+
+            // Backtrack
+            dist--;
+            this.level--;
+            col++;
+            stepped[row][col] = false;
+            path.removeLast();
+        }
+
+        return children;
+    }
+
+
+    public List<Direction> solveMaze(Cell[][] maze, boolean[][] stepped, int row, int col, int dist, boolean finished) {
+
+        int best = Integer.MAX_VALUE;
+        List<Direction> shortestPath = new ArrayList<>();
+
+        this.finalX = row;
+        this.finalY = col;
+
+        PriorityQueue<Solution> queue = new PriorityQueue<>();
+        Solution first = new Solution(finalX, finalY);
+        queue.offer(first);
+
+        int bestMH = first.getCost();
+
+        while(!queue.isEmpty()) {
+            Solution sol = queue.poll();
+            List<Solution> children = sol.expand(maze, stepped, row, col, dist, finished);
+
+            for (Solution child : children) {
+
+                System.out.println();
+                if (child.finished) {
+                    if (child.dist < best) {
+                        best = child.dist;
+                        shortestPath = child.path;
+                    }
+                } else {
+                    if (child.getCost() < bestMH) {
+                        queue.offer(child);
+                    }
+                }
+            }
+        }
+
+        return shortestPath;
+    }
+
+    @Override
+    public int compareTo(Solution o) {
+        return this.getCost() - o.getCost();
     }
 }
