@@ -10,9 +10,8 @@ public class Problem {
         String filenameDungeon = "lib/datasets/dungeon.txt";
         int i = 0, j = 0;
         Cell[][] cells = new Cell[25][25];
-        int start_row, start_col, exit_row, exit_col;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filenameCave))){
+        try (BufferedReader reader = new BufferedReader(new FileReader(filenameDungeon))){
             for (i = 0; i < 2; i++) {
                 reader.readLine();
             }
