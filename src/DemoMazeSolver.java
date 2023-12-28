@@ -6,8 +6,6 @@ import edu.salle.url.maze.presentation.MazeRenderer;
 import java.util.*;
 
 public class DemoMazeSolver implements MazeSolver {
-    private static int option;
-    private static int size;
     private int[] findPos(Cell[][] maze, Cell targetCell) {
         for (int i = 0; i < maze.length; i++) {
             for (int j = 0; j < maze[0].length; j++) {
@@ -17,11 +15,6 @@ public class DemoMazeSolver implements MazeSolver {
             }
         }
         throw new IllegalArgumentException(targetCell + " not found in the maze.");
-    }
-
-    public DemoMazeSolver(int option, int size) {
-        DemoMazeSolver.option = option;
-        DemoMazeSolver.size = size;
     }
 
     @Override

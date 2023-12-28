@@ -1,6 +1,5 @@
 import edu.salle.url.maze.Maze;
 import edu.salle.url.maze.MazeBuilder;
-import edu.salle.url.maze.business.enums.Cell;
 
 import java.util.Scanner;
 
@@ -15,16 +14,16 @@ public class Main {
         System.out.println("1. Cave");
         System.out.println("2. Dungeon");
 
-        // To change the size of the maze, just change this variable.
-        int size = 25;
-
         int option;
+        System.out.println();
 
         do {
-            System.out.println();
             System.out.print("Please, enter a number between 1 and 2: ");
             option = scanner.nextInt();
         } while (option < 1 || option > 2);
+
+        System.out.print("Please, enter a size number (please, less than 100): ");
+        int size = scanner.nextInt();
 
         System.out.print("Please, enter a seed (set 42 for examples): ");
         int seed = scanner.nextInt();
@@ -32,19 +31,19 @@ public class Main {
         switch (option) {
             case 1:
                 Maze caveMaze = new MazeBuilder()
-                        .setMazeColumns(25)
-                        .setMazeRows(25)
+                        .setMazeColumns(size)
+                        .setMazeRows(size)
                         .setSeed(seed)
-                        .setMazeSolver(new DemoMazeSolver(option, size))
+                        .setMazeSolver(new DemoMazeSolver())
                         .buildCaveMaze();
                 caveMaze.run();
                 break;
             case 2:
                 Maze dungeonMaze = new MazeBuilder()
-                        .setMazeColumns(25)
-                        .setMazeRows(25)
+                        .setMazeColumns(size)
+                        .setMazeRows(size)
                         .setSeed(seed)
-                        .setMazeSolver(new DemoMazeSolver(option, size))
+                        .setMazeSolver(new DemoMazeSolver())
                         .buildDungeonMaze();
                 dungeonMaze.run();
                 break;
