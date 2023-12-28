@@ -41,9 +41,9 @@
         }
 
         public Solution(Solution parent) {
-            this.maze = new Cell[25][25];
-            for (int i = 0; i < 25; i++) {
-                System.arraycopy(parent.maze[i], 0, this.maze[i], 0, 25);
+            this.maze = new Cell[parent.maze.length][parent.maze.length];
+            for (int i = 0; i < parent.maze.length; i++) {
+                System.arraycopy(parent.maze[i], 0, this.maze[i], 0, parent.maze.length);
             }
             this.path = new ArrayList<>(parent.path);
             this.posX = parent.posX;
@@ -52,13 +52,13 @@
             this.dist = parent.dist;
         }
 
-        private int getCost() {
+        private int getApproxCost() {
             int heuristicCost = Math.abs(finalX - this.posX) + Math.abs(finalY - this.posY);
             return this.dist + heuristicCost;
         }
 
         private boolean isValid(int x, int y) {
-            return x >= 0 && y >= 0 && x < 25 && y < 25;
+            return x >= 0 && y >= 0 && x < this.maze.length && y < this.maze.length;
         }
 
         private List<Solution> expand() {
@@ -147,7 +147,7 @@
             int bestCost = Integer.MAX_VALUE;
             List<Direction> shortestPath = new ArrayList<>();
 
-            PriorityQueue<Solution> queue = new PriorityQueue<>(Comparator.comparingInt(Solution::getCost));
+            PriorityQueue<Solution> queue = new PriorityQueue<>(Comparator.comparingInt(Solution::getApproxCost));
             Solution first = new Solution(finalX, finalY, this.maze);
             queue.offer(first);
 
@@ -160,7 +160,7 @@
 
                 for (Solution child : children) {
                     if (!child.isFinished()) {
-                        if (child.getCost() < bestCost) {
+                        if (child.getApproxCost() < bestCost) {
                             queue.offer(child);
                         }
                     } else {
