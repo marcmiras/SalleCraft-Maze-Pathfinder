@@ -6,28 +6,32 @@ import edu.salle.url.maze.presentation.MazeRenderer;
 import java.util.*;
 
 public class DemoMazeSolver implements MazeSolver {
-
-    @Override
-    public List<Direction> solve(Cell[][] cells, MazeRenderer mazeRenderer) {
-        cells = Problem.CellReader();
-        int start_row = 0, start_col = 0, end_row = 0, end_col = 0;
-
-        for (int i=0; i<Globals.rows; i++) {
-            for (int j=0; j<Globals.cols; j++) {
-                if (cells[i][j] == Cell.START) {
-                    start_row = i;
-                    start_col = j;
-                }
-                if (cells[i][j] == Cell.EXIT) {
-                    end_row = i;
-                    end_col = j;
+    private static int option;
+    private int[] findPos(Cell[][] maze, Cell targetCell) {
+        for (int i = 0; i < maze.length; i++) {
+            for (int j = 0; j < maze[0].length; j++) {
+                if (maze[i][j] == targetCell) {
+                    return new int[]{i, j};
                 }
             }
         }
+        throw new IllegalArgumentException(targetCell + " not found in the maze.");
+    }
 
-        Solution sol = new Solution(end_row, end_col);
+    public DemoMazeSolver(int option) {
+        DemoMazeSolver.option = option;
+    }
 
-        List<Direction> directions = sol.solveMaze(start_row, start_col, end_row, end_col);
+    @Override
+    public List<Direction> solve(Cell[][] cells, MazeRenderer mazeRenderer) {
+        cells = Problem.CellReader(option);
+
+        int[] startPos = findPos(cells, Cell.START);
+        int[] endPos = findPos(cells, Cell.EXIT);
+
+        Solution sol = new Solution(endPos[0], endPos[1], cells);
+
+        List<Direction> directions = sol.solveMaze(startPos[0], startPos[1]);
         mazeRenderer.render(cells, directions, 1);
 
         return directions;
